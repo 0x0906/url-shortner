@@ -135,7 +135,8 @@ If you want to build your own frontend or integrate TrimURL into another app, he
 ### 🚀 Redirection
 - `GET /:shortCode` — **This is the magic route!** Visiting `http://localhost:5000/your-alias` automatically tracks the click, figures out the user's browser/device, and redirects them to the original massive URL.
 
-### 📷 Screenshots
+---
+## 📷 Screenshots
 <img width="1919" height="2984" alt="1" src="https://github.com/user-attachments/assets/7e63fcbd-4f64-4489-8738-e41e9cb7dbd9" />
 <img width="1919" height="1979" alt="2" src="https://github.com/user-attachments/assets/723c8b85-01e2-4238-bbfc-6833ec99f13e" />
 <img width="1919" height="1979" alt="3" src="https://github.com/user-attachments/assets/32d16247-47d7-4477-a4bd-7c9082e3b7df" />
