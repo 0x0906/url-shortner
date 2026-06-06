@@ -1,0 +1,12 @@
+import express from 'express';
+import { create, list, update, remove, resolveShortUrl } from '../controllers/urlController';
+import { protect, optionalProtect } from '../middleware/auth';
+import { authLimiter } from '../middleware/rateLimiter';
+import { validate, urlSchema } from '../validators/zodValidator';
+const router = express.Router();
+router.post('/resolve/:shortCode', resolveShortUrl as any);
+router.post('/', authLimiter, optionalProtect as any, validate(urlSchema), create as any);
+router.get('/', protect as any, list as any);
+router.put('/:id', protect as any, validate(urlSchema), update as any);
+router.delete('/:id', protect as any, remove as any);
+export default router;
