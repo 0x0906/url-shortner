@@ -1,139 +1,234 @@
-# Hey there! Welcome to TrimURL 👋
+# TrimURL 👋 — Premium URL Shortener & Analytics Suite (Spring Boot & React)
 
-Ever looked at a massive, ugly link and thought, *"I can't send this to someone?"* That's exactly why **TrimURL** exists. It's a modern, full-stack URL shortener that doesn't just shrink your links—it supercharges them. 
+Ever looked at a massive, ugly link and thought, *"I can't send this to someone?"* That's exactly why **TrimURL** exists. It's a modern, full-stack URL shortener that doesn't just shrink your links—it supercharges them.
 
-Built from the ground up with a sleek, distraction-free interface, TrimURL lets you track exactly who is clicking your links, from what devices, and from what browsers. Plus, it packs advanced features like password protection, custom aliases, and self-destructing one-time links. 
-
----
-
-## ✨ What can it do?
-
-- **Shrink It:** Turn massive URLs into clean, short links instantly.
-- **Make It Yours:** Use custom aliases (like `trimurl.com/my-launch`) so people know exactly what they're clicking.
-- **Track Everything:** Get deep, real-time analytics. We're talking total clicks, browser breakdowns, OS stats, and device types.
-- **QR Codes on Demand:** Instantly download scannable QR codes for your flyers, presentations, or business cards.
-- **Lock It Down:** 
-  - Need to share something private? Throw a **password** on the link.
-  - Only want it viewed once? Create a **One-Time Link** that self-destructs after the first click.
-  - Time-sensitive? Set an **expiration date**.
-- **Dark Mode by Default:** A beautiful, high-contrast UI that looks amazing in both light and dark modes.
+Built from the ground up with a sleek, distraction-free interface, TrimURL lets you track exactly who is clicking your links, from what devices, and from what browsers. Plus, it packs advanced features like password protection, custom aliases, and self-destructing one-time links.
 
 ---
 
-## 🛠️ What's under the hood?
+## ✨ Features
 
-I wanted this app to be fast, reliable, and easy to maintain. Here is the tech stack powering TrimURL:
+- **⚡ Instant Shortening:** Turn massive URLs into clean, short links in a fraction of a second.
+- **🏷️ Custom Branding & Aliases:** Define custom URLs (e.g., `trimurl.com/my-launch`) so audiences click with trust.
+- **📊 Deep Real-Time Analytics:** Access clean stats capturing browser footprints, operating systems, and device types.
+- **📱 Dynamic QR Code Generator:** Instantly download scannable QR codes for presentations, print, or business cards.
+- **🛡️ Multi-Level Access Controls:**
+  - **Password Protection:** Secure destination redirects behind a password check.
+  - **Self-Destructing (One-Time) Links:** Create private links that disappear forever after their first click.
+  - **Expiration Timestamps:** Set automatic expiration dates to render URLs inactive after specified times.
+- **🌙 Glassmorphic Dark UI:** Beautiful high-contrast, premium interface built for developers and teams alike.
 
-**The Frontend:**
-- **React & Vite:** For a lightning-fast single-page application experience.
-- **Tailwind CSS:** To craft that sleek, modern, glass-like UI without writing endless CSS files.
-- **Lucide React:** For beautiful, minimal icons.
-- **React Router:** For seamless client-side navigation.
+---
 
-**The Backend & Database:**
-- **Node.js & Express:** The workhorse handling all API requests and redirects.
-- **PostgreSQL:** A rock-solid relational database to store users, URLs, and every single click event.
-- **Prisma:** A modern ORM that makes interacting with the database a breeze.
-- **JWT (JSON Web Tokens):** For secure, stateless user authentication.
-- **Nodemailer:** To handle transactional emails like password resets.
+## 🛠️ Architecture & Tech Stack
+
+```mermaid
+graph TD
+    A[React + Vite Frontend] -->|REST API Requests| B[Spring Boot 3 Web Layer]
+    B -->|Stateless Security Filters| C[Spring Security + JWT]
+    B -->|In-Memory Resolution Cache| D[LinkedHashMap LRU Cache]
+    B -->|Service Layer| E[Business Logic]
+    E -->|Data JPA / Hibernate| F[PostgreSQL DB]
+```
+
+### Frontend Stack:
+- **React & Vite:** Fast, optimized single-page bundle.
+- **Tailwind CSS:** Fully customized glassmorphic design token system.
+- **Lucide Icons:** Clean, minimalist UI iconography.
+
+### Backend Stack:
+- **Spring Boot 3 (Java 17):** Production-ready REST APIs.
+- **Spring Security & JWT:** Stateless filter chain parsing cookies/headers directly into security contexts.
+- **Spring Data JPA & Hibernate:** Object-relational mapping to PostgreSQL schemas.
+- **LRU Cache:** Custom, thread-safe, LinkedHashMap-backed cache (Capacity: 500) to resolve shortcodes with instant cache eviction on updates.
+- **Rate Limiter Filter:** In-memory request bucket tracking client IPs to prevent authentication attacks.
 
 ---
 
 ## 💻 Running it on your machine
 
-Want to play around with the code or host it yourself? It's pretty straightforward. You'll need **Node.js** (v18+ is best) and a **PostgreSQL** database running.
+### Prerequisite Checklist
+Make sure you have the following installed:
+- **Java JDK 17 or 21**
+- **Maven 3.x**
+- **Node.js (v18+)**
+- **PostgreSQL Database** running on port `5432`
 
-### 1. Grab the code
+---
+
+### 1. Grab the Repository
 ```bash
 git clone https://github.com/yourusername/URL_Shortner.git
 cd URL_Shortner
 ```
 
-### 2. Boot up the Backend
-First, let's get the server running. Head into the backend folder:
-```bash
-cd backend
-npm install
-```
+---
 
-You'll need to tell the app how to connect to your database and handle secrets. Create a file named `.env` inside the `backend` folder and fill it in:
-```env
-# The port your backend will run on
-PORT=5000
+### 2. Boot up the Spring Boot Backend
+1. Open your PostgreSQL console and create a database named `url_shortener`.
+2. Configure your database username, password, and JWT secret in [backend-springboot/src/main/resources/application.properties](file:///c:/Users/Username/Desktop/URL/backend-springboot/src/main/resources/application.properties):
+   ```properties
+   spring.datasource.url=jdbc:postgresql://localhost:5432/url_shortener
+   spring.datasource.username=postgres
+   spring.datasource.password=123
+   
+   # Random JWT signature key (minimum 256 bits)
+   jwt.secret=mySuperSecretKeyForJwtTokenGenerationThatIsLongEnough123456
+   ```
+3. Run the application from your IDE (e.g. IntelliJ IDEA) or via the terminal:
+   ```powershell
+   cd backend-springboot
+   $env:JAVA_HOME="C:\Users\Username\.jdks\ms-21.0.11"
+   & "C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.3\plugins\maven\lib\maven3\bin\mvn.cmd" spring-boot:run
+   ```
+   *(The backend server will launch at `http://localhost:5000`)*
 
-# Your Postgres connection string
-DATABASE_URL="postgresql://username:password@localhost:5432/trimurl?schema=public"
+---
 
-# Make up some random strings for these!
-JWT_SECRET="super_secret_key_here"
-JWT_REFRESH_SECRET="another_super_secret_key_here"
-
-# Where your frontend lives
-FRONTEND_URL="http://localhost:5173"
-
-# Email config (for password resets and verification)
-SMTP_HOST="smtp.example.com"
-SMTP_PORT=587
-SMTP_USER="your_email@example.com"
-SMTP_PASS="your_email_password"
-```
-
-Next, sync up your database tables using Prisma:
-```bash
-npx prisma generate
-npx prisma db push
-```
-
-And finally, start the engine:
-```bash
-npm run dev
-```
-*(Your backend is now listening on `http://localhost:5000`)*
-
-### 3. Boot up the Frontend
-Open a completely new terminal window, and let's get the UI running:
+### 3. Boot up the React Frontend
+Open a new terminal window to start the dev server:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-*(Your frontend is now live at `http://localhost:5173`)*
-
-Open that URL in your browser, and you're good to go! 🎉
+*(The frontend dashboard will launch at `http://localhost:5173`)*
 
 ---
 
-## 🔌 API Documentation
+## 🔌 REST API Documentation
 
-If you want to build your own frontend or integrate TrimURL into another app, here is a quick cheat sheet for the main REST API endpoints.
-
-> **Note:** Most of these routes require an `Authorization` header containing your JWT Bearer token (except for logging in, registering, and resolving links).
+Protected routes require secure user context via cookies (`token` / `refreshToken`) or Authorization headers.
 
 ### 🔐 Authentication (`/api/auth`)
-- `POST /register` — Create a new account. Requires `name`, `email`, and `password`.
-- `POST /login` — Log in and receive your access/refresh tokens. Requires `email` and `password`.
-- `POST /logout` — Log out of your current session.
-- `GET /sessions` — View all the devices/browsers currently logged into your account.
-- `DELETE /sessions/:sessionId` — Log out a specific device remotely.
-- `DELETE /sessions` — Log out of *all* devices at once.
-- `POST /forgot-password` — Send a password reset email.
-- `POST /reset-password` — Set a new password using an emailed token.
-- `POST /change-password` — Change your password while logged in.
+
+#### Register Account
+- **Endpoint:** `POST /register`
+- **Request Body:**
+  ```json
+  {
+    "name": "Alex",
+    "email": "alex@gmail.com",
+    "password": "Password123!"
+  }
+  ```
+- **Response (201):**
+  ```json
+  {
+    "success": true,
+    "message": "Registration successful! Please check your email to verify your account.",
+    "user": {
+      "id": "e9b25123-1ab2-4b2b-987a-87b6451c234a",
+      "name": "Alex",
+      "email": "alex@gmail.com",
+      "created_at": "2026-07-04T00:59:00Z"
+    }
+  }
+  ```
+
+#### User Login
+- **Endpoint:** `POST /login`
+- **Request Body:**
+  ```json
+  {
+    "email": "alex@gmail.com",
+    "password": "Password123!"
+  }
+  ```
+- **Response (200):**
+  ```json
+  {
+    "success": true,
+    "user": {
+      "id": "e9b25123-1ab2-4b2b-987a-87b6451c234a",
+      "name": "Alex",
+      "email": "alex@gmail.com",
+      "created_at": "2026-07-04T00:59:00Z"
+    }
+  }
+  ```
+
+---
 
 ### 🔗 URLs (`/api/urls`)
-- `POST /` — Shorten a new URL. 
-  - *Body:* `original_url` (required), `custom_alias`, `expires_at`, `password`, `is_one_time`.
-- `GET /` — Fetch a paginated list of all your shortened URLs.
-- `PUT /:id` — Update settings for a specific URL (like toggling it active/inactive).
-- `DELETE /:id` — Permanently delete a short link.
-- `POST /resolve/:shortCode` — Resolve a password-protected link to get the original destination.
+
+#### Create Short URL
+- **Endpoint:** `POST /`
+- **Request Body:**
+  ```json
+  {
+    "original_url": "https://wikipedia.org/wiki/Systems_architecture",
+    "custom_alias": "systems-arch",
+    "is_one_time": false,
+    "expires_at": "2026-07-15T00:00:00Z"
+  }
+  ```
+- **Response (201):**
+  ```json
+  {
+    "success": true,
+    "data": {
+      "id": "762b71fa-1234-4b5b-a2c6-ef4172a6b2da",
+      "original_url": "https://wikipedia.org/wiki/Systems_architecture",
+      "short_code": "8H2vXa",
+      "custom_alias": "systems-arch",
+      "click_count": 0,
+      "expires_at": "2026-07-15T00:00:00Z",
+      "is_one_time": false,
+      "is_active": true,
+      "created_at": "2026-07-04T01:00:00Z"
+    }
+  }
+  ```
+
+---
 
 ### 📊 Analytics (`/api/analytics`)
-- `GET /dashboard` — Get high-level stats for your dashboard (total clicks, recent activity, top links).
-- `GET /url/:id` — Get deep-dive analytics for a specific link (timeline graphs, device, and browser breakdowns).
+
+#### Get Dashboard Analytics
+- **Endpoint:** `GET /dashboard`
+- **Response (200):**
+  ```json
+  {
+    "success": true,
+    "data": {
+      "summary": {
+        "totalUrls": 5,
+        "totalClicks": 142,
+        "activeUrls": 4
+      },
+      "topUrls": [
+        {
+          "id": "762b71fa-1234-4b5b-a2c6-ef4172a6b2da",
+          "original_url": "https://wikipedia.org/wiki/Systems_architecture",
+          "short_code": "8H2vXa",
+          "click_count": 94
+        }
+      ],
+      "breakdowns": {
+        "browser": [
+          { "name": "Chrome", "value": 85, "percentage": 59.9 },
+          { "name": "Firefox", "value": 57, "percentage": 40.1 }
+        ],
+        "os": [
+          { "name": "Windows", "value": 112, "percentage": 78.9 },
+          { "name": "macOS", "value": 30, "percentage": 21.1 }
+        ],
+        "device": [
+          { "name": "Desktop", "value": 130, "percentage": 91.5 },
+          { "name": "Mobile", "value": 12, "percentage": 8.5 }
+        ]
+      }
+    }
+  }
+  ```
+
+---
 
 ### 🚀 Redirection
-- `GET /:shortCode` — **This is the magic route!** Visiting `http://localhost:5000/your-alias` automatically tracks the click, figures out the user's browser/device, and redirects them to the original massive URL.
+- **Endpoint:** `GET /:shortCode`
+- **Description:** Accessing `http://localhost:5000/{shortCode}` automatically parses request agents, asynchronously records the click event in the visits database, and redirects the client to the target URL.
+
 
 ---
 ## 📷 Screenshots
