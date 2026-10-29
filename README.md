@@ -12,7 +12,7 @@ graph LR
     User -->|Open Short Link| Backend[Express Backend]
     Frontend -->|API Requests| Backend
     Backend -->|Read / Write| DB[(PostgreSQL Database)]
-    Backend -->|Verification & Reset| SMTP[SMTP / Gmail]
+    Backend -->|Verification & Reset| Email[Resend API / SMTP]
 ```
 
 ---
@@ -27,7 +27,7 @@ graph LR
   - **Expiration Dates**: Set links to expire at a specific date and time.
 - **QR Code Generator**: Generates downloadable QR codes for any shortened link.
 - **User Authentication**:
-  - Signup with email verification via SMTP (Nodemailer).
+  - Signup with email verification via **Resend HTTPS API** or **Nodemailer SMTP**.
   - Anti-spoofing protection (blocks `+alias` tricks and normalizes email dots/casing).
   - Secure JWT access and refresh tokens stored in HTTP-only cookies.
   - Device and session management (view active sessions or logout from all devices).
@@ -44,7 +44,7 @@ graph LR
 - **pg**: Official PostgreSQL client pool with auto-initialization for tables and indexes on server start.
 - **bcryptjs**: Hashes user passwords and link access passwords.
 - **jsonwebtoken & cookie-parser**: Issues and reads JWT access and refresh tokens in HTTP-only cookies.
-- **nodemailer**: Sends account verification and password reset emails through SMTP.
+- **Email Service**: **Resend REST API** (HTTPS port 443, required for Render Free tier where SMTP ports are blocked) with **Nodemailer SMTP** fallback.
 - **lru-cache**: High-speed in-memory cache to resolve short URLs quickly without hitting the database every time.
 - **express-validator**: Middleware to validate request inputs (emails, URLs, passwords).
 - **ua-parser-js**: Extracts visitor browser, operating system, and device from request headers.
@@ -90,7 +90,17 @@ RATE_LIMIT_AUTH_WINDOW_MS=900000
 # Cache size
 CACHE_MAX_SIZE=500
 
-# SMTP Email Configuration (e.g. Gmail App Password)
+# -------------------------------------------------------------
+# Email Configuration
+# -------------------------------------------------------------
+# Option 1: Resend API (RECOMMENDED for Render and cloud hosting)
+# Render Free tier blocks outbound SMTP ports 25, 465, and 587.
+# Resend uses standard HTTPS (port 443), so it delivers reliably.
+# Sign up free at https://resend.com and paste your API key here:
+RESEND_API_KEY=re_your_api_key_here
+
+# Option 2: SMTP / Gmail (For local development or hosting without port blocks)
+# If RESEND_API_KEY is not set, the backend falls back to SMTP:
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_SECURE=false
@@ -99,7 +109,7 @@ SMTP_PASS=your_gmail_app_password
 SMTP_FROM=TrimURL <noreply@trimurl.com>
 ```
 
-> **Note on Gmail:** If using Gmail, generate an **App Password** from your Google Account settings (Security -> 2-Step Verification -> App Passwords) and paste it into `SMTP_PASS`.
+> **Render Deployment Tip:** When hosting the backend on Render Free Tier, you only need `RESEND_API_KEY` for emails. You can leave out all `SMTP_*` variables completely!
 
 ### Frontend (`frontend/.env`)
 

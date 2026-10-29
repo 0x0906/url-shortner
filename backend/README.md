@@ -18,7 +18,11 @@ JWT_SECRET=your_jwt_secret
 CLIENT_URL=http://localhost:5173
 BACKEND_URL=http://localhost:5000
 
-# SMTP Email Configuration
+# Email Configuration (Choose one)
+# Option 1: Resend API (Recommended for Render Free tier - uses HTTPS, no port blocking)
+RESEND_API_KEY=re_your_api_key_here
+
+# Option 2: SMTP (For local development)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your_email@gmail.com
