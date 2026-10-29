@@ -27,8 +27,8 @@ graph TD
     A[React + Vite Frontend] -->|REST API Requests| B[Express.js + TypeScript Backend]
     B -->|Cookie & Header Authentication| C[JWT + bcryptjs Middleware]
     B -->|Fast Resolution Cache| D[LRU Cache]
-    B -->|ORM & Models| E[TypeORM]
-    E -->|Database Queries| F[PostgreSQL DB]
+    B -->|Data Models & Queries| E[PostgreSQL pg Pool]
+    B -->|Transactional Emails| F[Nodemailer SMTP]
 ```
 
 ### Frontend
@@ -38,8 +38,9 @@ graph TD
 
 ### Backend
 - **Node.js & Express.js:** Fast, asynchronous HTTP REST API server.
-- **TypeScript:** Type-safe development across models, routes, and services.
-- **TypeORM & PostgreSQL:** Strongly typed database entities and query builder.
+- **TypeScript:** Type-safe development across models, controllers, routes, and services.
+- **PostgreSQL (pg pool):** Lightweight, direct parameterized SQL queries with automatic table and index initialization.
+- **Nodemailer:** Automated HTML account verification emails and password reset links.
 - **JWT & HTTP-Only Cookies:** Secure, stateless session management with access and refresh tokens.
 - **LRU Cache:** In-memory caching for instant short URL resolution.
 - **Custom Rate Limiter:** Protects authentication and URL creation routes from abuse.
@@ -84,13 +85,18 @@ CREATE DATABASE url_shortener;
 3. Update environment variables in `.env` if needed:
    ```env
    PORT=5000
-   DATABASE_URL=localhost
-   DB_PORT=5432
-   DB_NAME=url_shortener
-   DB_USERNAME=postgres
-   DB_PASSWORD=123
+   DATABASE_URL=postgresql://postgres:123@localhost:5432/url_shortener
    JWT_SECRET=mySuperSecretKeyForJwtTokenGenerationThatIsLongEnough123456
    CLIENT_URL=http://localhost:5173
+   BACKEND_URL=http://localhost:5000
+
+   # Email configuration (SMTP)
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_SECURE=false
+   SMTP_USER=your_email@gmail.com
+   SMTP_PASS=your_app_password
+   SMTP_FROM=TrimURL <noreply@trimurl.com>
    ```
 4. Start the backend development server:
    ```bash
@@ -183,6 +189,11 @@ All protected routes authenticate users using HTTP-only cookies (`token` / `refr
 
 ### 🚀 Redirection
 - **GET** `/:shortCode` — Redirects visitors to target destination while recording analytics asynchronously.
+
+---
+
+### 🩺 Health Checks
+- **GET** `/health` (and `/api/health`) — Live status check and PostgreSQL connection health for Render and uptime monitoring.
 
 ---
 
