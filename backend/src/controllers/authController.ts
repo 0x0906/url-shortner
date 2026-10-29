@@ -51,6 +51,13 @@ export function clearCookies(res: Response) {
   });
 }
 
+function getSenderEmail(): string {
+  if (process.env.RESEND_API_KEY) {
+    return process.env.RESEND_FROM || "onboarding@resend.dev";
+  }
+  return process.env.SMTP_USER || "vignesh.m.dev.0906@gmail.com";
+}
+
 export const authController = {
   async register(req: Request, res: Response) {
     const { name, email, password } = req.body;
@@ -72,9 +79,12 @@ export const authController = {
       false
     );
 
-    await sendVerificationEmail(cleanEmail, verificationToken);
+    // Send verification email in background so the response returns instantly (<100ms)
+    sendVerificationEmail(cleanEmail, verificationToken).catch((err: any) => {
+      console.error("[EMAIL] Background verification send failed:", err.message);
+    });
 
-    const senderEmail = process.env.SMTP_USER || "vignesh.m.dev.0906@gmail.com";
+    const senderEmail = getSenderEmail();
 
     res.status(201).json({
       success: true,
@@ -106,7 +116,7 @@ export const authController = {
     }
 
     if (!user.is_verified) {
-      const senderEmail = process.env.SMTP_USER || "vignesh.m.dev.0906@gmail.com";
+      const senderEmail = getSenderEmail();
       throw new ApiError(
         `Please verify your email before logging in. Verification link was sent to ${user.email} from ${senderEmail}. Please also check your spam folder.`,
         401
@@ -234,7 +244,10 @@ export const authController = {
         const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
         await userModel.setResetToken(user.id, hashedToken, expiresAt);
-        await sendPasswordResetEmail(cleanEmail, rawToken);
+        // Send reset email in background so response returns instantly
+        sendPasswordResetEmail(cleanEmail, rawToken).catch((err: any) => {
+          console.error("[EMAIL] Background password reset send failed:", err.message);
+        });
       }
     } catch {}
 
