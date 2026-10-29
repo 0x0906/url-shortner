@@ -33,7 +33,7 @@ export const Landing = () => {
         const response: any = await api.post('/urls', { original_url: url });
         if (response.success) {
           const shortCode = response.data.short_code;
-          const fullUrl = `${window.location.origin.replace('5173', '5000')}/${shortCode}`;
+          const fullUrl = `${window.location.origin}/${shortCode}`;
           setShortenedUrl(fullUrl);
           toast('Short link created! Expires in 7 days.', 'success');
         }

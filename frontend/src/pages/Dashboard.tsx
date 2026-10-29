@@ -114,7 +114,7 @@ export const Dashboard = () => {
     toast('Link copied to clipboard!', 'success');
   };
   const getFullShortUrl = (shortCode: string) => {
-    return `${window.location.origin.replace('5173', '5000')}/${shortCode}`;
+    return `${window.location.origin}/${shortCode}`;
   };
   const getPercentageList = (list: BreakdownItem[]) => {
     if (!list || list.length === 0) return [];

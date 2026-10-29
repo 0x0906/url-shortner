@@ -78,7 +78,7 @@ export const AnalyticsDetail = () => {
     toast('Link copied to clipboard!', 'success');
   };
   const getFullShortUrl = (shortCode: string) => {
-    return `${window.location.origin.replace('5173', '5000')}/${shortCode}`;
+    return `${window.location.origin}/${shortCode}`;
   };
   if (isLoading || !report) {
     return (

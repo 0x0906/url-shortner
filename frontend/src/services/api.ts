@@ -12,7 +12,16 @@ const api = axios.create({
   }
 });
 api.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    if (typeof response.data === 'string' && response.data.trim().toLowerCase().startsWith('<!doctype html>')) {
+      return Promise.reject(
+        new Error(
+          'API URL configuration error: VITE_API_URL is missing in Vercel environment variables.'
+        )
+      );
+    }
+    return response.data;
+  },
   (error) => {
     const errorMessage = error.response?.data?.error || 'An unexpected error occurred. Please try again.';
     return Promise.reject(new Error(errorMessage));

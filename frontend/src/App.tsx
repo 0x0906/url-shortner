@@ -29,6 +29,7 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/redirect/:shortCode" element={<RedirectPage />} />
+              <Route path="/:shortCode" element={<RedirectPage />} />
               <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/links" element={<Links />} />

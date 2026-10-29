@@ -9,7 +9,10 @@ import { ApiError } from "../utils/ApiError";
 import { normalizeEmail } from "../utils/emailNormalizer";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../config/mail";
 
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction =
+  process.env.NODE_ENV === "production" ||
+  Boolean(process.env.BACKEND_URL && process.env.BACKEND_URL.startsWith("https://")) ||
+  Boolean(process.env.CLIENT_URL && process.env.CLIENT_URL.startsWith("https://"));
 
 export function setTokenCookie(res: Response, token: string) {
   res.cookie("token", token, {

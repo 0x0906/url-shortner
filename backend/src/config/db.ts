@@ -26,6 +26,9 @@ const requiresSsl =
 const poolConfig: PoolConfig = {
   connectionString: databaseUrl,
   ssl: requiresSsl ? { rejectUnauthorized: false } : false,
+  connectionTimeoutMillis: 10000,
+  idleTimeoutMillis: 30000,
+  max: 10,
 };
 
 export const pool = new Pool(poolConfig);

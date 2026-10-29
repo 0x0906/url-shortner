@@ -35,6 +35,10 @@ function checkLimit(buckets: Map<string, Bucket>, key: string, max: number): boo
 }
 
 export function rateLimiter(req: Request, res: Response, next: NextFunction) {
+  if (req.method === "OPTIONS") {
+    return next();
+  }
+
   const path = req.path;
 
   if (!path.startsWith("/api/") || path === "/api/health") {
