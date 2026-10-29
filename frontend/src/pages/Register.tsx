@@ -29,6 +29,8 @@ export const Register = () => {
       newErrors.email = 'Email required.';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = 'Invalid email.';
+    } else if (email.split('@')[0]?.includes('+')) {
+      newErrors.email = 'Email aliases using "+" are not permitted.';
     }
     if (!password) {
       newErrors.password = 'Must be 8+ chars with upper, lower, number, and symbol.';
@@ -57,11 +59,14 @@ export const Register = () => {
 
     setIsLoading(true);
     try {
-      await register(name, email, password);
-      toast('Signed up! Check console for link.', 'success');
+      const response = await register(name, email, password);
+      const sender = response?.senderEmail || 'vignesh.m.dev.0906@gmail.com';
+      toast('Signed up! Verification email sent.', 'success');
       navigate('/login', { 
         state: { 
-          verificationInfo: 'Link sent. Click it to verify, then log in.' 
+          verificationInfo: `Verification link sent to ${email} from ${sender}. Please also check your spam folder.`,
+          userEmail: email,
+          senderEmail: sender
         } 
       });
     } catch (err: any) {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Mail } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/useToast';
 import Input from '../components/Input';
@@ -16,7 +17,12 @@ export const Login = () => {
   const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const state = location.state as { prefilledUrl?: string; verificationInfo?: string } | null;
+  const state = location.state as {
+    prefilledUrl?: string;
+    verificationInfo?: string;
+    userEmail?: string;
+    senderEmail?: string;
+  } | null;
   const queryParams = new URLSearchParams(location.search);
   const isVerified = queryParams.get('verified') === 'true';
   const isError = queryParams.get('error');
@@ -79,8 +85,32 @@ export const Login = () => {
           )}
 
           {state?.verificationInfo && !isVerified && (
-            <div className="mb-6 p-4 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-zinc-800 dark:text-zinc-200 text-sm font-medium flex items-center justify-center">
-              {state.verificationInfo}
+            <div className="mb-6 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-800/50 backdrop-blur-sm">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-xl bg-zinc-200/60 dark:bg-zinc-700/50 text-zinc-700 dark:text-zinc-300 shrink-0">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <div className="text-xs space-y-1 flex-1 min-w-0">
+                  <p className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm">
+                    Verification link sent
+                  </p>
+                  {state.userEmail && state.senderEmail ? (
+                    <>
+                      <p className="text-zinc-600 dark:text-zinc-400 text-xs leading-relaxed">
+                        Sent to <span className="font-semibold text-zinc-900 dark:text-zinc-200">{state.userEmail}</span> from{' '}
+                        <span className="font-semibold text-zinc-900 dark:text-zinc-200">{state.senderEmail}</span>.
+                      </p>
+                      <p className="text-zinc-500 dark:text-zinc-400 text-[11px] pt-1">
+                        Please check your inbox or spam folder to complete verification.
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-zinc-600 dark:text-zinc-400 text-xs leading-relaxed">
+                      {state.verificationInfo}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
