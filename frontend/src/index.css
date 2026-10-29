@@ -19,6 +19,18 @@ body {
 body.dark {
   background-color: #0a0a0b;
   color: #f4f4f5;
+  color-scheme: dark;
+}
+
+html.dark,
+.dark {
+  color-scheme: dark;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  color-scheme: dark;
 }
 
 .glass-panel {
@@ -178,7 +190,39 @@ input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 1000px #0a0a0b inset !important;
   box-shadow: 0 0 0 1000px #0a0a0b inset !important;
   -webkit-text-fill-color: #f4f4f5 !important;
+  caret-color: #f4f4f5 !important;
   transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Prevent native spelling or grammar checks from forcing text color to black */
+::spelling-error {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+  background-color: transparent !important;
+}
+
+::grammar-error {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+  background-color: transparent !important;
+}
+
+input::spelling-error,
+input::grammar-error,
+textarea::spelling-error,
+textarea::grammar-error {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+  background-color: transparent !important;
+}
+
+.dark input::spelling-error,
+.dark input::grammar-error,
+.dark textarea::spelling-error,
+.dark textarea::grammar-error {
+  color: #f4f4f5 !important;
+  -webkit-text-fill-color: #f4f4f5 !important;
+  background-color: transparent !important;
 }
 
 .bg-grid-pattern {

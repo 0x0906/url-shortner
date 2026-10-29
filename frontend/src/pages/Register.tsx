@@ -106,6 +106,10 @@ export const Register = () => {
               onChange={(e) => setEmail(e.target.value)}
               error={errors.email}
               required
+              autoComplete="email"
+              spellCheck={false}
+              autoCorrect="off"
+              autoCapitalize="none"
             />
             <Input
               label="Password"

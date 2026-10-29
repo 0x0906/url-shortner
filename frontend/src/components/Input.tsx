@@ -13,6 +13,9 @@ const Input: React.FC<InputProps> = ({
   error,
   required = false,
   className = '',
+  spellCheck = false,
+  autoCorrect = 'off',
+  autoCapitalize = 'none',
   ...props
 }) => {
   return (
@@ -33,6 +36,11 @@ const Input: React.FC<InputProps> = ({
         value={value}
         onChange={onChange}
         required={required}
+        spellCheck={spellCheck}
+        autoCorrect={autoCorrect}
+        autoCapitalize={autoCapitalize}
+        data-gramm="false"
+        data-enable-grammarly="false"
         className={`w-full px-4 py-2.5 bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-500/20 transition-all duration-200 ${
           error ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20 dark:border-rose-500 dark:focus:border-rose-500 dark:focus:ring-rose-500/20' : ''
         }`}

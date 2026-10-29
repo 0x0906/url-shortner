@@ -59,6 +59,11 @@ export const ForgotPassword = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
+                  spellCheck={false}
+                  autoCorrect="off"
+                  autoCapitalize="none"
+                  data-gramm="false"
+                  data-enable-grammarly="false"
                   className="w-full px-3 py-2 bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-md text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
                 />
               </div>
