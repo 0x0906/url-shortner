@@ -37,7 +37,7 @@ function checkLimit(buckets: Map<string, Bucket>, key: string, max: number): boo
 export function rateLimiter(req: Request, res: Response, next: NextFunction) {
   const path = req.path;
 
-  if (!path.startsWith("/api/")) {
+  if (!path.startsWith("/api/") || path === "/api/health") {
     return next();
   }
 
@@ -50,8 +50,8 @@ export function rateLimiter(req: Request, res: Response, next: NextFunction) {
     "/api/auth/reset-password",
   ];
 
-  const isAuthPath = strictPaths.includes(path) ||
-    (path === "/api/urls" && req.method === "POST");
+  const isAuthPath =
+    strictPaths.includes(path) || (path === "/api/urls" && req.method === "POST");
 
   if (isAuthPath) {
     if (!checkLimit(authBuckets, clientIp + ":auth", AUTH_MAX)) {

@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken, generateAccessToken } from "../utils/jwt";
-import { AppDataSource } from "../data-source";
-import { User } from "../entity/User";
-import { Session } from "../entity/Session";
+import { userModel, IUser } from "../models/userModel";
+import { sessionModel } from "../models/sessionModel";
 
 declare global {
   namespace Express {
@@ -19,9 +18,6 @@ declare global {
 }
 
 export async function authMiddleware(req: Request, res: Response, next: NextFunction) {
-  const userRepo = AppDataSource.getRepository(User);
-  const sessionRepo = AppDataSource.getRepository(Session);
-
   let token = req.cookies?.token;
   if (!token || token === "none") {
     const authHeader = req.headers.authorization;
@@ -31,7 +27,7 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
   }
 
   if (!token || token === "none") {
-    await attemptRefresh(req, res, userRepo, sessionRepo);
+    await attemptRefresh(req, res);
     return next();
   }
 
@@ -41,36 +37,31 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
     const sessionId = decoded.sessionId;
 
     if (sessionId) {
-      const session = await sessionRepo.findOne({ where: { id: sessionId } });
+      const session = await sessionModel.findById(sessionId);
       if (!session) {
         return next();
       }
     }
 
-    const user = await userRepo.findOne({ where: { id: userId } });
+    const user = await userModel.findById(userId);
     if (user) {
       setUserOnRequest(req, user);
     }
   } catch {
-    await attemptRefresh(req, res, userRepo, sessionRepo);
+    await attemptRefresh(req, res);
   }
 
   next();
 }
 
-async function attemptRefresh(
-  req: Request,
-  res: Response,
-  userRepo: any,
-  sessionRepo: any
-) {
+async function attemptRefresh(req: Request, res: Response) {
   const refreshToken = req.cookies?.refreshToken;
   if (!refreshToken || refreshToken === "none") return;
 
   try {
-    const session = await sessionRepo.findOne({ where: { refreshToken } });
-    if (session && new Date(session.expiresAt) > new Date()) {
-      const newAccessToken = generateAccessToken(session.userId, session.id);
+    const session = await sessionModel.findByRefreshToken(refreshToken);
+    if (session && new Date(session.expires_at) > new Date()) {
+      const newAccessToken = generateAccessToken(session.user_id, session.id);
 
       res.cookie("token", newAccessToken, {
         httpOnly: true,
@@ -79,7 +70,7 @@ async function attemptRefresh(
         maxAge: 15 * 60 * 1000,
       });
 
-      const user = await userRepo.findOne({ where: { id: session.userId } });
+      const user = await userModel.findById(session.user_id);
       if (user) {
         setUserOnRequest(req, user);
       }
@@ -88,12 +79,12 @@ async function attemptRefresh(
   }
 }
 
-function setUserOnRequest(req: Request, user: User) {
+function setUserOnRequest(req: Request, user: IUser) {
   req.user = {
     id: user.id,
     name: user.name,
     email: user.email,
-    created_at: user.createdAt.toISOString(),
+    created_at: user.created_at ? new Date(user.created_at).toISOString() : new Date().toISOString(),
   };
   req.userId = user.id;
 }
