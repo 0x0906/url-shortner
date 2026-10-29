@@ -1,202 +1,198 @@
-# TrimURL 👋 — Premium URL Shortener & Analytics Suite
+# TrimURL - URL Shortener & Analytics
 
-Have you ever looked at a massive, messy link and hesitated before sharing it? **TrimURL** turns long, unwieldy web addresses into sleek, memorable links—complete with real-time analytics, access controls, and custom branding.
-
-Built with a fast **Express.js + TypeScript** backend and a responsive **React** frontend, TrimURL lets you track link clicks, analyze visitor demographics (browser, OS, device), and protect sensitive redirects with passwords or expiration dates.
+A full-stack URL shortener built with Express.js, TypeScript, PostgreSQL, and React. It supports custom link aliases, password-protected redirects, link expiration, dynamic QR codes, visitor analytics, and user authentication with email verification.
 
 ---
 
-## ✨ Features
-
-- **⚡ Instant Shortening:** Shrink long URLs into clean, short codes in milliseconds.
-- **🏷️ Custom Branding & Aliases:** Create branded links (e.g., `trimurl.com/my-launch`) that build trust with your audience.
-- **📊 Real-Time Analytics:** Monitor click counts, visitor locations, operating systems, browsers, and device breakdowns.
-- **📱 Dynamic QR Code Generator:** Instantly generate scannable QR codes for print, presentations, or business cards.
-- **🛡️ Custom Access Controls:**
-  - **Password Protection:** Lock destination links behind a secure password check.
-  - **Self-Destructing (One-Time) Links:** Automatically deactivate URLs after their first click.
-  - **Custom Expiration Dates:** Set links to expire after a specific date and time.
-- **🌙 Glassmorphic Dark Mode:** High-contrast, polished dark UI designed for modern web apps.
-
----
-
-## 🛠️ Architecture & Tech Stack
+## Architecture
 
 ```mermaid
-graph TD
-    A[React + Vite Frontend] -->|REST API Requests| B[Express.js + TypeScript Backend]
-    B -->|Cookie & Header Authentication| C[JWT + bcryptjs Middleware]
-    B -->|Fast Resolution Cache| D[LRU Cache]
-    B -->|Data Models & Queries| E[PostgreSQL pg Pool]
-    B -->|Transactional Emails| F[Nodemailer SMTP]
+graph LR
+    User[Browser / Client] --> Frontend[React + Vite Frontend]
+    User -->|Open Short Link| Backend[Express Backend]
+    Frontend -->|API Requests| Backend
+    Backend -->|Read / Write| DB[(PostgreSQL Database)]
+    Backend -->|Verification & Reset| SMTP[SMTP / Gmail]
 ```
 
-### Frontend
-- **React & Vite:** Fast single-page application bundling.
-- **Tailwind CSS:** Custom glassmorphic styling system.
-- **Lucide Icons:** Minimalist UI icon set.
+---
+
+## Features
+
+- **URL Shortening**: Generate random 6-character short codes or set custom aliases (e.g. `yourdomain.com/launch`).
+- **Visitor Analytics**: Track total clicks, daily click history, and breakdown by browser, OS, and device type.
+- **Access Controls**:
+  - **Password Protection**: Ask visitors for a password before redirecting.
+  - **One-Time Links**: Automatically deactivate link after its first visit.
+  - **Expiration Dates**: Set links to expire at a specific date and time.
+- **QR Code Generator**: Generates downloadable QR codes for any shortened link.
+- **User Authentication**:
+  - Signup with email verification via SMTP (Nodemailer).
+  - Anti-spoofing protection (blocks `+alias` tricks and normalizes email dots/casing).
+  - Secure JWT access and refresh tokens stored in HTTP-only cookies.
+  - Device and session management (view active sessions or logout from all devices).
+  - Password reset with time-limited email reset tokens.
+- **Render Health Check**: `/health` and `/api/health` endpoints for uptime monitoring.
+
+---
+
+## Tech Stack & Packages
 
 ### Backend
-- **Node.js & Express.js:** Fast, asynchronous HTTP REST API server.
-- **TypeScript:** Type-safe development across models, controllers, routes, and services.
-- **PostgreSQL (pg pool):** Lightweight, direct parameterized SQL queries with automatic table and index initialization.
-- **Nodemailer:** Automated HTML account verification emails and password reset links.
-- **JWT & HTTP-Only Cookies:** Secure, stateless session management with access and refresh tokens.
-- **LRU Cache:** In-memory caching for instant short URL resolution.
-- **Custom Rate Limiter:** Protects authentication and URL creation routes from abuse.
+- **Node.js & Express**: Web framework for building the REST API.
+- **TypeScript**: Static typing for routes, models, and controllers.
+- **pg**: Official PostgreSQL client pool with auto-initialization for tables and indexes on server start.
+- **bcryptjs**: Hashes user passwords and link access passwords.
+- **jsonwebtoken & cookie-parser**: Issues and reads JWT access and refresh tokens in HTTP-only cookies.
+- **nodemailer**: Sends account verification and password reset emails through SMTP.
+- **lru-cache**: High-speed in-memory cache to resolve short URLs quickly without hitting the database every time.
+- **express-validator**: Middleware to validate request inputs (emails, URLs, passwords).
+- **ua-parser-js**: Extracts visitor browser, operating system, and device from request headers.
+- **dotenv**: Loads configuration from the `.env` file.
+
+### Frontend
+- **React 19 & Vite**: Fast development build and single-page application bundling.
+- **React Router**: Client-side page routing and redirect handling.
+- **Tailwind CSS**: Glassmorphic UI styling with dark mode support.
+- **Axios**: HTTP client for API calls with cookie support.
+- **qrcode.react**: Generates SVG/Canvas QR codes for links.
+- **lucide-react**: Lightweight icon set.
 
 ---
 
-## 💻 Quick Start
+## Environment Variables
+
+### Backend (`backend/.env`)
+
+Create a `.env` file in the `backend/` folder:
+
+```env
+PORT=5000
+
+# PostgreSQL connection string (works with local Postgres, Supabase, Neon, or Render)
+DATABASE_URL=postgresql://postgres:password@localhost:5432/url_shortener
+
+# JWT Secret & Token Expirations
+JWT_SECRET=your_super_secret_jwt_key_make_it_long_and_random
+JWT_ACCESS_EXPIRATION=900000
+JWT_REFRESH_EXPIRATION=604800000
+
+# Client & Backend URLs (used for redirect links and email verification)
+CLIENT_URL=http://localhost:5173
+BACKEND_URL=http://localhost:5000
+
+# Rate Limiting
+RATE_LIMIT_API_MAX=150
+RATE_LIMIT_API_WINDOW_MS=900000
+RATE_LIMIT_AUTH_MAX=30
+RATE_LIMIT_AUTH_WINDOW_MS=900000
+
+# Cache size
+CACHE_MAX_SIZE=500
+
+# SMTP Email Configuration (e.g. Gmail App Password)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_gmail_app_password
+SMTP_FROM=TrimURL <noreply@trimurl.com>
+```
+
+> **Note on Gmail:** If using Gmail, generate an **App Password** from your Google Account settings (Security -> 2-Step Verification -> App Passwords) and paste it into `SMTP_PASS`.
+
+### Frontend (`frontend/.env`)
+
+Optional for local development (Vite automatically proxies `/api` to `http://localhost:5000` via `vite.config.js`). For production deployment:
+
+```env
+VITE_API_URL=https://your-backend.onrender.com
+```
+
+---
+
+## How to Run Locally
 
 ### Prerequisites
-Make sure you have installed:
-- **Node.js (v18+)**
-- **npm**
-- **PostgreSQL Database** running on `localhost:5432`
+- Node.js (v18 or higher)
+- npm
+- PostgreSQL database (local or free cloud database like Supabase/Neon)
 
 ---
 
-### 1. Clone the Repository
+### Step 1: Start the Backend
+
+Open a terminal window:
+
 ```bash
-git clone https://github.com/yourusername/URL_Shortner.git
-cd URL_Shortner
-```
+# 1. Go to backend folder
+cd backend
 
----
-
-### 2. Set Up the PostgreSQL Database
-Create a database named `url_shortener` in PostgreSQL:
-```sql
-CREATE DATABASE url_shortener;
-```
-
----
-
-### 3. Configure & Start the Backend
-1. Navigate to the `backend` folder:
-   ```bash
-   cd backend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Update environment variables in `.env` if needed:
-   ```env
-   PORT=5000
-   DATABASE_URL=postgresql://postgres:123@localhost:5432/url_shortener
-   JWT_SECRET=mySuperSecretKeyForJwtTokenGenerationThatIsLongEnough123456
-   CLIENT_URL=http://localhost:5173
-   BACKEND_URL=http://localhost:5000
-
-   # Email configuration (SMTP)
-   SMTP_HOST=smtp.gmail.com
-   SMTP_PORT=587
-   SMTP_SECURE=false
-   SMTP_USER=your_email@gmail.com
-   SMTP_PASS=your_app_password
-   SMTP_FROM=TrimURL <noreply@trimurl.com>
-   ```
-4. Start the backend development server:
-   ```bash
-   npm run dev
-   ```
-   *(Backend will start on `http://localhost:5000`)*
-
----
-
-### 4. Start the React Frontend
-Open a new terminal window:
-```bash
-cd frontend
+# 2. Install dependencies
 npm install
+
+# 3. Create .env file (copy from example and add your database URL)
+cp env.example .env
+
+# 4. Start backend dev server
 npm run dev
 ```
-*(Frontend dashboard will start on `http://localhost:5173`)*
+
+The backend starts on `http://localhost:5000`. Database tables and indexes are automatically created on first run.
 
 ---
 
-## 🔌 REST API Overview
+### Step 2: Start the Frontend
 
-All protected routes authenticate users using HTTP-only cookies (`token` / `refreshToken`) or standard `Authorization: Bearer <token>` headers.
+Open a **second** terminal window:
 
-### 🔐 Authentication (`/api/auth`)
+```bash
+# 1. Go to frontend folder
+cd frontend
 
-#### Register Account
-- **POST** `/api/auth/register`
-- **Body:**
-  ```json
-  {
-    "name": "Alex",
-    "email": "alex@example.com",
-    "password": "Password123!"
-  }
-  ```
+# 2. Install dependencies
+npm install
 
-#### Login
-- **POST** `/api/auth/login`
-- **Body:**
-  ```json
-  {
-    "email": "alex@example.com",
-    "password": "Password123!"
-  }
-  ```
+# 3. Start frontend dev server
+npm run dev
+```
 
-#### Current User Profile
-- **GET** `/api/auth/me`
-
-#### Logout
-- **POST** `/api/auth/logout`
+The frontend dashboard starts on `http://localhost:5173`.
 
 ---
 
-### 🔗 URLs (`/api/urls`)
+## API Endpoints
 
-#### Create Short Link
-- **POST** `/api/urls`
-- **Body:**
-  ```json
-  {
-    "original_url": "https://wikipedia.org/wiki/Systems_architecture",
-    "custom_alias": "systems-arch",
-    "is_one_time": false,
-    "expires_at": "2026-12-31T23:59:59Z"
-  }
-  ```
+### Authentication (`/api/auth`)
+- `POST /api/auth/register` - Create account (sends email verification)
+- `POST /api/auth/login` - Login with email and password
+- `POST /api/auth/logout` - Logout and clear session cookies
+- `GET /api/auth/me` - Get current logged-in user profile
+- `GET /api/auth/verify?token=...` - Verify email token
+- `POST /api/auth/refresh` - Refresh access token using refresh cookie
+- `GET /api/auth/sessions` - List active login sessions / devices
+- `DELETE /api/auth/sessions/:id` - Terminate a specific session
+- `POST /api/auth/logout-all` - Logout from all devices
+- `POST /api/auth/forgot-password` - Send password reset link to email
+- `POST /api/auth/reset-password` - Reset password with token
 
-#### Get User URLs
-- **GET** `/api/urls?search=&is_active=true&page=1&limit=10`
+### URLs (`/api/urls`)
+- `POST /api/urls` - Create shortened URL (supports alias, password, expiry, one-time)
+- `GET /api/urls` - Get paginated list of user's URLs (with search and status filter)
+- `PUT /api/urls/:id` - Update link settings (alias, password, expiry, active state)
+- `DELETE /api/urls/:id` - Delete shortened URL
+- `POST /api/urls/resolve/:shortCode` - Check password & get target URL for redirect
 
-#### Update Link Options
-- **PUT** `/api/urls/:id`
+### Analytics (`/api/analytics`)
+- `GET /api/analytics/dashboard` - Overall user summary (clicks, top links, chart, devices)
+- `GET /api/analytics/url/:id` - Detailed analytics for a single URL
 
-#### Delete Link
-- **DELETE** `/api/urls/:id`
-
----
-
-### 📊 Analytics (`/api/analytics`)
-
-#### User Dashboard Summary
-- **GET** `/api/analytics/dashboard`
-
-#### Single Link Analytics
-- **GET** `/api/analytics/url/:id`
+### Redirect & Health
+- `GET /:shortCode` - 302 redirect to frontend redirect page
+- `GET /health` (and `/api/health`) - Health check endpoint for Render deployment
 
 ---
 
-### 🚀 Redirection
-- **GET** `/:shortCode` — Redirects visitors to target destination while recording analytics asynchronously.
+## License
 
----
-
-### 🩺 Health Checks
-- **GET** `/health` (and `/api/health`) — Live status check and PostgreSQL connection health for Render and uptime monitoring.
-
----
-
-## 📜 License
-
-Distributed under the MIT License. Feel free to use, adapt, and build upon this project!
+MIT License
