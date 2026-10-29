@@ -38,3 +38,7 @@ coverage/
 # Local Automation & Helper Scripts (Keep strictly local)
 *.sh
 
+# Backup and old code folders
+backend-old/
+
+
